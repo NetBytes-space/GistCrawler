@@ -17,7 +17,7 @@ def download_file(path: str, url: str, file_name):
     makedir(path)
     file_content = requests.get(url)
     f = open(base_path + path + "/" + file_name, "w")
-    f.write(file_content.raw)
+    f.write(str(file_content.text))
     f.close()
 
 
@@ -31,6 +31,7 @@ def get_gist_content(gist: json):
         file_name = gist["files"][x]["filename"]
         raw_url = gist["files"][x]["raw_url"]
         file_id = re.sub(regex_base + file_name, '', raw_url)
+        print(raw_url)
         download_file(user_id + "/" + gist_id + "/" + file_id, raw_url, file_name)
 
 
@@ -47,7 +48,6 @@ if __name__ == '__main__':
             exit(1)
         for el in gists:
             get_gist_content(el)
-            exit()
     except json.JSONDecodeError:
         print("Error decoding json. Data :")
         print(data.text)
