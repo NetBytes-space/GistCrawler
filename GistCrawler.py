@@ -3,6 +3,7 @@ import os
 import requests
 import json
 import re
+import sqlite3
 
 api_endpoint = "https://api.github.com/gists"
 base_path = "./data/"
@@ -13,12 +14,24 @@ def makedir(path: str = ""):
         os.makedirs(base_path + path)
 
 
+def db_get():
+    makedir()
+    return sqlite3.connect(base_path + "data.db").cursor()
+
+
+def db_init():
+    sql_file = open("setup.sql")
+    sql_data = sql_file.read()
+    cur = db_get()
+    cur.executescript(sql_data)
+    cur.close()
+
+
 def download_file(path: str, url: str, file_name):
     makedir(path)
     file_content = requests.get(url)
-    f = open(base_path + path + "/" + file_name, "w")
-    f.write(str(file_content.text))
-    f.close()
+    with open(base_path + path + "/" + file_name, "w") as f:
+        f.write(str(file_content.content))
 
 
 def get_gist_content(gist: json):
@@ -36,6 +49,9 @@ def get_gist_content(gist: json):
 
 
 if __name__ == '__main__':
+    print("Init database")
+    db_init()
+    exit(0)
     print("Getting data from api")
     data: requests.api = requests.get(api_endpoint)
     print("Loading data")
